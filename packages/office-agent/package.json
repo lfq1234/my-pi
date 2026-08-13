@@ -1,0 +1,37 @@
+{
+  "name": "@earendil-works/pi-office-agent",
+  "version": "0.0.3",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "shx rm -rf dist",
+    "build": "tsgo -p tsconfig.build.json",
+    "start": "node dist/cli.js",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "office-agent",
+    "agent",
+    "office",
+    "html",
+    "email",
+    "poster"
+  ],
+  "author": "Earendil Works",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}
