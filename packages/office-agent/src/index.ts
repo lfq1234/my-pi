@@ -4,5 +4,8 @@ export * from "./core/document-reader.ts";
 export * from "./tools/html-generator.ts";
 export * from "./tools/email-generator.ts";
 export * from "./tools/poster-brief.ts";
+export * from "./services/email-client.ts";
+export * from "./services/seedance-client.ts";
+export * from "./ui/preview.ts";
 export * from "./workflows/report-workflow.ts";
 export * from "./workflows/office-workflow.ts";

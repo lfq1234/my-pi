@@ -10,6 +10,7 @@ export type OfficeFileKind =
   | "unknown";
 
 export type OutputFormat = "html" | "markdown" | "json" | "txt";
+export type EmailProvider = "mock" | "smtp" | "graph" | "webhook";
 
 export interface OfficeDocument {
   id: string;
@@ -20,6 +21,13 @@ export interface OfficeDocument {
   content: string;
   metadata: Record<string, string | number | boolean | null>;
   createdAt: string;
+}
+
+export interface OfficeDocumentSummary {
+  title: string;
+  summary: string;
+  sections: OfficeReportSection[];
+  warnings: string[];
 }
 
 export interface OfficeReportSection {
@@ -56,6 +64,11 @@ export interface PosterBrief {
   createdAt: string;
 }
 
+export interface PreviewArtifact {
+  html: string;
+  path: string;
+}
+
 export interface OfficeAgentOptions {
   defaultOutputDir?: string;
   defaultTitle?: string;
@@ -76,4 +89,5 @@ export interface OfficeAgentRunResult {
   emailDraft: EmailDraft;
   posterBrief: PosterBrief;
   outputDir: string;
+  preview?: PreviewArtifact;
 }
