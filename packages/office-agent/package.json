@@ -32,6 +32,9 @@
     "email",
     "poster"
   ],
+  "dependencies": {
+    "jszip": "3.10.1"
+  },
   "author": "Earendil Works",
   "license": "MIT",
   "engines": {
