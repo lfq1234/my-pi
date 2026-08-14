@@ -5,11 +5,11 @@ import type {
   OfficeMultiAgentTask,
   OfficeMultiAgentWorkflowInput,
   OfficeMultiAgentWorkflowResult,
-} from "../core/types.ts";
+} from "../../core/types.ts";
 
 const ROLE_SYSTEM: Record<OfficeMultiAgentRole, string> = {
   planner: "You are the planner. Break the request into clear steps, key decisions, and a concise action plan.",
-  reader: "You are the reader. Extract the key facts, signals, and evidence from the provided context.",
+  reader: "You are the reader. Extract key facts, signals, and evidence from the provided context.",
   writer: "You are the writer. Turn the evidence into a concise, business-ready result using the provided context.",
   reviewer: "You are the reviewer. Check for risk, tone, clarity, and omissions before finalizing.",
   executor: "You are the executor. Convert the approved brief into a concrete deliverable and outputs.",
@@ -21,10 +21,7 @@ function formatPrompt(task: OfficeMultiAgentTask, previousOutput?: string): stri
     ? prompt.replace(/\{previous\}/g, previousOutput ?? "")
     : prompt;
 
-  const contextBlock = task.context?.trim()
-    ? `\n\nContext:\n${task.context.trim()}`
-    : "";
-
+  const contextBlock = task.context?.trim() ? `\n\nContext:\n${task.context.trim()}` : "";
   return `${ROLE_SYSTEM[task.role]}\n\nTask:\n${transformed}${contextBlock}`;
 }
 

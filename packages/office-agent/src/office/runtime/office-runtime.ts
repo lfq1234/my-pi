@@ -1,4 +1,4 @@
-import type { OfficeDocument, OfficeFileKind } from "../core/types.ts";
+import type { OfficeDocument, OfficeFileKind } from "../../core/types.ts";
 
 export interface OfficeAgentRuntimeContext {
   agentName: string;
@@ -23,23 +23,14 @@ export class OfficeAgentRuntime {
   }
 
   async readDocuments(): Promise<OfficeRuntimeToolResult<OfficeDocument[]>> {
-    return {
-      ok: true,
-      data: [],
-    };
+    return { ok: true, data: [] };
   }
 
   async summarizeDocuments(): Promise<OfficeRuntimeToolResult<string>> {
-    return {
-      ok: true,
-      data: "Office agent runtime initialized.",
-    };
+    return { ok: true, data: "Office agent runtime initialized." };
   }
 
   async writeDocument(kind: OfficeFileKind, content: string): Promise<OfficeRuntimeToolResult<string>> {
-    return {
-      ok: true,
-      data: `Prepared ${kind} output for ${this.context.agentName}.`,
-    };
+    return { ok: true, data: `Prepared ${kind} output for ${this.context.agentName}.` };
   }
 }

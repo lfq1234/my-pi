@@ -1,2 +1,3 @@
-export * from "./tools/email-generator.ts";
+// Deprecated: use the office artifacts layer instead.
+export {};
 

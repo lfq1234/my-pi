@@ -1,2 +1,3 @@
-export * from "./tools/html-generator.ts";
+// Deprecated: use the office artifacts layer instead.
+export {};
 
