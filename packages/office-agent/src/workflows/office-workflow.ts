@@ -1,7 +1,9 @@
-import { createGeneratedReport } from "../tools/html-generator.ts";
+import { createGeneratedReport, buildPreviewPage } from "../tools/html-generator.ts";
 import { createEmailDraft } from "../tools/email-generator.ts";
 import { createPosterBrief } from "../tools/poster-brief.ts";
 import { readOfficeDirectory } from "../core/document-reader.ts";
+import { EmailClient } from "../services/email-client.ts";
+import { SeedanceClient } from "../services/seedance-client.ts";
 import { writeTextFile } from "../utils.ts";
 import { resolve } from "node:path";
 
@@ -44,8 +46,37 @@ export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promis
   const emailDraft = createEmailDraft(input.to ?? "team@example.com", `${title} update`, summary, "professional");
   const posterBrief = createPosterBrief(title, audience, style, summary);
 
+  const seedanceClient = new SeedanceClient();
+  const seedance = await seedanceClient.generateImage({
+    prompt: posterBrief.prompt,
+    style,
+    ratio: "16:9",
+  });
+
+  const emailClient = new EmailClient("mock");
+  const emailSend = await emailClient.sendEmail({
+    to: input.to ?? "team@example.com",
+    subject: emailDraft.subject,
+    body: emailDraft.body,
+    provider: "mock",
+  });
+
   const outputDir = resolve(process.cwd(), ".office-agent-output", `workflow-${Date.now()}`);
+  const previewHtml = buildPreviewPage({
+    title,
+    summary,
+    documentSections: sections,
+    posterPrompt: posterBrief.prompt,
+    emailSubject: emailDraft.subject,
+    emailBody: emailDraft.body,
+    files: documents.map((document) => ({
+      fileName: document.fileName,
+      summary: document.summary,
+    })),
+  });
+
   await writeTextFile(resolve(outputDir, "report.html"), report.html);
+  await writeTextFile(resolve(outputDir, "preview.html"), previewHtml);
   await writeTextFile(resolve(outputDir, "summary.md"), `# ${title}\n\n${summary}\n`);
 
   return {
@@ -54,5 +85,21 @@ export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promis
     emailDraft,
     posterBrief,
     documents,
-  };
+    preview: {
+      html: previewHtml,
+      path: resolve(outputDir, "preview.html"),
+    },
+    seedance: {
+      status: seedance.status,
+      message: seedance.status === "generated" ? "Seedance generation completed." : "Seedance stayed in draft mode.",
+      imageUrl: seedance.imageUrl,
+      localPath: seedance.localPath,
+    },
+    emailSend: {
+      sent: emailSend.sent,
+      provider: emailSend.provider,
+      status: emailSend.status,
+      message: emailSend.message,
+    },
+  } as any;
 }

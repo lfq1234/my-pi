@@ -1,8 +1,10 @@
 import { readdir, stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
-import { createGeneratedReport } from "../tools/html-generator.ts";
+import { createGeneratedReport, buildPreviewPage } from "../tools/html-generator.ts";
 import { createEmailDraft } from "../tools/email-generator.ts";
 import { createPosterBrief } from "../tools/poster-brief.ts";
+import { EmailClient } from "../services/email-client.ts";
+import { SeedanceClient } from "../services/seedance-client.ts";
 import { ensureDir, makeId, nowIso, normalizeOutputDirectory, readTextFile, writeTextFile } from "../utils.ts";
 import type { OfficeAgentOptions, OfficeAgentRunInput, OfficeAgentRunResult, OfficeDocument, OfficeFileKind } from "./types.ts";
 
@@ -53,8 +55,38 @@ export class OfficeAgent {
     const emailDraft = createEmailDraft("team@example.com", `${baseTitle} update`, summary, "professional");
     const posterBrief = createPosterBrief(baseTitle, input.audience ?? "general audience", input.style ?? "modern business", summary);
 
+    const seedanceClient = new SeedanceClient();
+    const seedance = await seedanceClient.generateImage({
+      prompt: posterBrief.prompt,
+      style: input.style ?? "modern business",
+      ratio: "16:9",
+    });
+
+    const emailClient = new EmailClient("mock");
+    const emailSend = await emailClient.sendEmail({
+      to: "team@example.com",
+      subject: emailDraft.subject,
+      body: emailDraft.body,
+      provider: "mock",
+    });
+
+    const previewHtml = buildPreviewPage({
+      title: baseTitle,
+      summary,
+      documentSections: reportSections,
+      posterPrompt: posterBrief.prompt,
+      emailSubject: emailDraft.subject,
+      emailBody: emailDraft.body,
+      files: documents.map((document) => ({
+        fileName: document.fileName,
+        summary: document.summary,
+      })),
+    });
+
     const htmlPath = resolve(outputDir, "report.html");
+    const previewPath = resolve(outputDir, "preview.html");
     await writeTextFile(htmlPath, report.html);
+    await writeTextFile(previewPath, previewHtml);
 
     const summaryPath = resolve(outputDir, "summary.md");
     await writeTextFile(summaryPath, `# ${baseTitle}\n\n${summary}\n`);
@@ -65,6 +97,22 @@ export class OfficeAgent {
       emailDraft,
       posterBrief,
       outputDir,
+      preview: {
+        html: previewHtml,
+        path: previewPath,
+      },
+      seedance: {
+        status: seedance.status,
+        message: seedance.status === "generated" ? "Seedance generation completed." : "Seedance request stayed in draft mode because no API key was configured.",
+        imageUrl: seedance.imageUrl,
+        localPath: seedance.localPath,
+      },
+      emailSend: {
+        sent: emailSend.sent,
+        provider: emailSend.provider,
+        status: emailSend.status,
+        message: emailSend.message,
+      },
     };
   }
 

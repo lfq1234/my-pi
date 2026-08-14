@@ -69,6 +69,12 @@ export interface PreviewArtifact {
   path: string;
 }
 
+export interface AgentServiceStatus {
+  generatedAt: string;
+  status: "draft" | "sent" | "failed" | "generated";
+  message: string;
+}
+
 export interface OfficeAgentOptions {
   defaultOutputDir?: string;
   defaultTitle?: string;
@@ -90,4 +96,6 @@ export interface OfficeAgentRunResult {
   posterBrief: PosterBrief;
   outputDir: string;
   preview?: PreviewArtifact;
+  seedance?: { status: string; message: string; imageUrl?: string; localPath?: string };
+  emailSend?: { sent: boolean; provider: string; status: string; message: string };
 }
