@@ -4,6 +4,8 @@ export * from "./readers/index.ts";
 export * from "./ingestion/index.ts";
 export * from "./writers/index.ts";
 export * from "./agents/index.ts";
+export * from "./runtime/office-runtime.ts";
+export * from "./services/shared-runtime-adapter.ts";
 export * from "./tools/html-generator.ts";
 export * from "./tools/email-generator.ts";
 export * from "./tools/poster-brief.ts";
