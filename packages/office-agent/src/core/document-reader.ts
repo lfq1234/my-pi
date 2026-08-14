@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
-import JSZip from "jszip";
+import { extractDocumentText, detectSourceType } from "../ingestion/office-parser.ts";
 import { makeId, nowIso } from "../utils.ts";
 import { detectFileKind } from "./office-agent.ts";
 import type { OfficeDocument, OfficeDocumentSummary, OfficeFileKind, OfficeReportSection } from "./types.ts";
@@ -112,6 +112,11 @@ async function listSupportedFiles(dirPath: string): Promise<string[]> {
 
 async function readFileTextByKind(filePath: string, kind: OfficeFileKind): Promise<string> {
   const fileBuffer = await readFile(filePath);
+
+  const sourceKind = await detectSourceType(filePath);
+  if (sourceKind !== kind && sourceKind !== "unknown") {
+    return extractDocumentText(filePath);
+  }
 
   switch (kind) {
     case "markdown":
