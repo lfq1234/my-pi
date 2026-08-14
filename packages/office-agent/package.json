@@ -18,7 +18,10 @@
   "scripts": {
     "clean": "shx rm -rf dist",
     "build": "tsgo -p tsconfig.build.json",
+    "build:bun": "bun build --compile --no-compile-autoload-bunfig ./src/bun/cli.ts --outfile ./dist/office-agent",
+    "build:binary": "npm run build && bun build --compile --no-compile-autoload-bunfig ./src/bun/cli.ts --outfile ./dist/office-agent",
     "start": "node dist/cli.js",
+    "start:bun": "bun run ./src/bun/cli.ts",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [

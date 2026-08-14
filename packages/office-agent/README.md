@@ -25,6 +25,16 @@ or
 node dist/cli.js --input ./materials --title "Weekly report"
 ```
 
+## Bun runtime
+
+```bash
+bun run ./src/bun/cli.ts --demo
+```
+
+```bash
+bun build --compile --no-compile-autoload-bunfig ./src/bun/cli.ts --outfile ./dist/office-agent
+```
+
 ## Planned evolution
 
 The next development phases will add:
