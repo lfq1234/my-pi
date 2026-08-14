@@ -99,3 +99,32 @@ export interface OfficeAgentRunResult {
   seedance?: { status: string; message: string; imageUrl?: string; localPath?: string };
   emailSend?: { sent: boolean; provider: string; status: string; message: string };
 }
+
+export type OfficeMultiAgentRole = "planner" | "reader" | "writer" | "reviewer" | "executor";
+export type OfficeMultiAgentMode = "single" | "parallel" | "chain";
+
+export interface OfficeMultiAgentTask {
+  role: OfficeMultiAgentRole;
+  prompt: string;
+  context?: string;
+}
+
+export interface OfficeMultiAgentResultEntry {
+  role: OfficeMultiAgentRole;
+  status: "completed" | "failed";
+  step: number;
+  output: string;
+  context?: string;
+}
+
+export interface OfficeMultiAgentWorkflowInput {
+  mode?: OfficeMultiAgentMode;
+  tasks: OfficeMultiAgentTask[];
+}
+
+export interface OfficeMultiAgentWorkflowResult {
+  mode: OfficeMultiAgentMode;
+  tasks: OfficeMultiAgentTask[];
+  results: OfficeMultiAgentResultEntry[];
+  finalOutput: string;
+}

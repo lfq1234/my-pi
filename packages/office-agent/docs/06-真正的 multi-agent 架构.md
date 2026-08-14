@@ -13,6 +13,13 @@
 
 ## 目标架构
 
+这一步要尽量贴近 code-agent 的真实写法：不是自研一套完全不同的调度器，而是采用“Coordinator + Specialized Subagents + workflow orchestration”的结构。也就是说，office-agent 也应该有：
+
+- 一个父级 orchestrator
+- 若干具备专门职责的子 agent
+- 三种执行方式：single / parallel / chain
+- 隔离上下文，避免角色互相污染
+
 建议拆成以下 5 个角色：
 
 ### 1. Planner
@@ -180,6 +187,13 @@ interface OfficeAgentContext {
 
 ## 适合的实现方式
 
+这部分应该直接参考 code-agent 的 subagent 设计思路：
+
+- parent orchestrator 负责决定调用哪个 agent
+- 每个 child agent 运行在自己的上下文窗口里
+- 支持 single / parallel / chain 三种调度模式
+- agent 输出通过共享 context 或返回值在下一步继续消费
+
 在 monorepo 中，建议按功能目录拆：
 
 ```text
@@ -192,12 +206,39 @@ packages/office-agent/
       reviewer.ts
       executor.ts
     runtime/
-      agent-runtime.ts
+      office-orchestrator.ts
       shared-context.ts
     workflows/
       office-workflow.ts
       multi-agent-workflow.ts
+    tools/
+      subagent-tool.ts
 ```
+
+### 参考 code-agent 的模式
+
+code-agent 的实现方式可以直接抽象为：
+
+```ts
+interface SubagentTask {
+  agent: "planner" | "reader" | "writer" | "reviewer" | "executor";
+  task: string;
+  context?: string;
+}
+
+interface MultiAgentWorkflow {
+  mode: "single" | "parallel" | "chain";
+  tasks: SubagentTask[];
+}
+```
+
+这意味着 office-agent 不需要设计一套完全独立的全新调度模型，而是沿用类似的：
+
+- single：一个角色处理一个任务
+- parallel：多个角色同步处理多个流程
+- chain：前一个结果作为下一个角色输入，类似 scout → planner → worker
+
+这会更符合 code-agent 的实践，也更容易后续扩展。 
 
 ## 关键价值
 

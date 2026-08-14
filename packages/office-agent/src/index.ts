@@ -9,3 +9,4 @@ export * from "./services/seedance-client.ts";
 export * from "./ui/preview.ts";
 export * from "./workflows/report-workflow.ts";
 export * from "./workflows/office-workflow.ts";
+export * from "./runtime/multi-agent-workflow.ts";
