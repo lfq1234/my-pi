@@ -1,11 +1,11 @@
+import { resolve } from "node:path";
 import { createGeneratedReport, buildPreviewPage } from "../tools/html-generator.ts";
 import { createEmailDraft } from "../tools/email-generator.ts";
 import { createPosterBrief } from "../tools/poster-brief.ts";
 import { readOfficeDirectory } from "../core/document-reader.ts";
 import { EmailClient } from "../services/email-client.ts";
 import { SeedanceClient } from "../services/seedance-client.ts";
-import { writeTextFile } from "../utils.ts";
-import { resolve } from "node:path";
+import { ensureDir, writeTextFile } from "../utils.ts";
 
 export interface OfficeWorkflowInput {
   directory?: string;
@@ -16,19 +16,30 @@ export interface OfficeWorkflowInput {
   to?: string;
 }
 
-export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promise<{ outputDir: string; report: any; emailDraft: any; posterBrief: any; documents: any[] }> {
+export interface OfficeArtifactWorkflowResult {
+  outputDir: string;
+  report: ReturnType<typeof createGeneratedReport>;
+  emailDraft: ReturnType<typeof createEmailDraft>;
+  posterBrief: ReturnType<typeof createPosterBrief>;
+  previewPath: string;
+  summaryPath: string;
+  files: Array<{ fileName: string; summary: string; path: string }>;
+  seedanceStatus: string;
+  emailStatus: string;
+}
+
+export async function runOfficeArtifactWorkflow(input: OfficeWorkflowInput = {}): Promise<OfficeArtifactWorkflowResult> {
   const directory = input.directory ?? process.cwd();
   const documents = await readOfficeDirectory(directory);
-
   const title = input.title ?? "Office Summary";
-  const summary = input.summary ?? documents.map((doc) => doc.summary).join("\n");
   const audience = input.audience ?? "general audience";
   const style = input.style ?? "modern executive";
+  const targetSummary = input.summary ?? documents.map((doc) => doc.summary).join("\n");
 
   const sections = [
     {
       title: "Document Summary",
-      content: summary,
+      content: targetSummary || "No document summary was available.",
       bullets: documents.map((doc) => `${doc.fileName}: ${doc.summary}`),
     },
     {
@@ -42,9 +53,9 @@ export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promis
     },
   ];
 
-  const report = createGeneratedReport(title, summary, sections);
-  const emailDraft = createEmailDraft(input.to ?? "team@example.com", `${title} update`, summary, "professional");
-  const posterBrief = createPosterBrief(title, audience, style, summary);
+  const report = createGeneratedReport(title, targetSummary || "No executive summary available.", sections);
+  const emailDraft = createEmailDraft(input.to ?? "team@example.com", `${title} update`, targetSummary, "professional");
+  const posterBrief = createPosterBrief(title, audience, style, targetSummary);
 
   const seedanceClient = new SeedanceClient();
   const seedance = await seedanceClient.generateImage({
@@ -62,9 +73,11 @@ export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promis
   });
 
   const outputDir = resolve(process.cwd(), ".office-agent-output", `workflow-${Date.now()}`);
+  await ensureDir(outputDir);
+
   const previewHtml = buildPreviewPage({
     title,
-    summary,
+    summary: targetSummary || "No summary available.",
     documentSections: sections,
     posterPrompt: posterBrief.prompt,
     emailSubject: emailDraft.subject,
@@ -75,31 +88,31 @@ export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promis
     })),
   });
 
-  await writeTextFile(resolve(outputDir, "report.html"), report.html);
-  await writeTextFile(resolve(outputDir, "preview.html"), previewHtml);
-  await writeTextFile(resolve(outputDir, "summary.md"), `# ${title}\n\n${summary}\n`);
+  const previewPath = resolve(outputDir, "preview.html");
+  const summaryPath = resolve(outputDir, "summary.md");
+  const htmlPath = resolve(outputDir, "report.html");
+
+  await writeTextFile(htmlPath, report.html);
+  await writeTextFile(previewPath, previewHtml);
+  await writeTextFile(summaryPath, `# ${title}\n\n${targetSummary}\n`);
 
   return {
     outputDir,
     report,
     emailDraft,
     posterBrief,
-    documents,
-    preview: {
-      html: previewHtml,
-      path: resolve(outputDir, "preview.html"),
-    },
-    seedance: {
-      status: seedance.status,
-      message: seedance.status === "generated" ? "Seedance generation completed." : "Seedance stayed in draft mode.",
-      imageUrl: seedance.imageUrl,
-      localPath: seedance.localPath,
-    },
-    emailSend: {
-      sent: emailSend.sent,
-      provider: emailSend.provider,
-      status: emailSend.status,
-      message: emailSend.message,
-    },
-  } as any;
+    previewPath,
+    summaryPath,
+    files: documents.map((document) => ({
+      fileName: document.fileName,
+      summary: document.summary,
+      path: document.filePath,
+    })),
+    seedanceStatus: seedance.status,
+    emailStatus: emailSend.status,
+  };
+}
+
+export async function runOfficeWorkflow(input: OfficeWorkflowInput = {}): Promise<OfficeArtifactWorkflowResult> {
+  return runOfficeArtifactWorkflow(input);
 }
