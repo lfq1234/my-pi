@@ -125,10 +125,16 @@ async function readFileTextByKind(filePath: string, kind: OfficeFileKind): Promi
       return await extractPdfText(fileBuffer);
     case "docx":
       return await extractDocxText(fileBuffer);
+    case "wps":
+      return await extractWpsCompatibleText(fileBuffer, "doc");
     case "xlsx":
       return await extractXlsxText(fileBuffer);
+    case "et":
+      return await extractWpsCompatibleText(fileBuffer, "sheet");
     case "pptx":
       return await extractPptxText(fileBuffer);
+    case "dps":
+      return await extractWpsCompatibleText(fileBuffer, "slide");
     default:
       return fileBuffer.toString("utf8") || `Unsupported file type for office agent: ${filePath}`;
   }
@@ -247,6 +253,49 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
     .join(" ");
 
   return decoded.trim() || `PDF text could not be extracted automatically. File size: ${buffer.length} bytes.`;
+}
+
+async function extractWpsCompatibleText(buffer: Buffer, kind: "doc" | "sheet" | "slide"): Promise<string> {
+  const zip = await JSZip.loadAsync(buffer).catch(() => null);
+
+  if (!zip) {
+    return "WPS Office file could not be opened as a ZIP-based document package.";
+  }
+
+  const xmlFiles = Object.keys(zip.files).filter((name) => name.toLowerCase().endsWith(".xml"));
+  const textParts: string[] = [];
+  const seen = new Set<string>();
+
+  for (const name of xmlFiles) {
+    const entry = zip.file(name);
+    if (!entry) continue;
+
+    const xml = await entry.async("string");
+    const matches = Array.from(
+      xml.matchAll(/<(?:w|a|c|t|v|p|s|text|Text|para|Paragraph|item)[^>]*>([\s\S]*?)<\/(?:w|a|c|t|v|p|s|text|Text|para|Paragraph|item)>/gi),
+    );
+
+    for (const match of matches) {
+      const decoded = decodeXmlText(match[1]).trim();
+      if (!decoded || decoded.length < 2) continue;
+      if (seen.has(decoded)) continue;
+      seen.add(decoded);
+      textParts.push(decoded);
+    }
+  }
+
+  if (textParts.length > 0) {
+    return textParts.join(" \n").trim();
+  }
+
+  const raw = buffer.toString("utf8", 0, Math.min(buffer.length, 4096));
+  const fallback = raw.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
+
+  if (fallback) {
+    return `WPS-compatible ${kind} file loaded but it did not expose standard XML text nodes. Raw fallback: ${fallback}`;
+  }
+
+  return `WPS-compatible ${kind} file was loaded but no readable text content was found.`;
 }
 
 function decodeXmlText(value: string): string {

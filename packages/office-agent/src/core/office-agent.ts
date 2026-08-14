@@ -180,14 +180,21 @@ export function detectFileKind(filePath: string): OfficeFileKind {
     case ".doc":
     case ".docx":
       return "docx";
+    case ".wps":
+    case ".wpt":
+      return "wps";
     case ".xls":
     case ".xlsx":
-      return "xlsx";
+    case ".et":
+    case ".ett":
+      return ext === ".et" || ext === ".ett" ? "et" : "xlsx";
     case ".csv":
       return "csv";
     case ".ppt":
     case ".pptx":
-      return "pptx";
+    case ".dps":
+    case ".dpt":
+      return ext === ".dps" || ext === ".dpt" ? "dps" : "pptx";
     default:
       return "unknown";
   }

@@ -7,6 +7,9 @@ export type OfficeFileKind =
   | "xlsx"
   | "csv"
   | "pptx"
+  | "wps"
+  | "et"
+  | "dps"
   | "unknown";
 
 export type OutputFormat = "html" | "markdown" | "json" | "txt";

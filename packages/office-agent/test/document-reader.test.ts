@@ -41,3 +41,17 @@ test("readOfficeFile keeps plain text content for markdown files", async () => {
   assert.match(result.document.content, /Revenue is stable this week/);
   assert.match(result.document.summary, /Revenue is stable this week/);
 });
+
+test("readOfficeFile recognizes WPS-style Office files and extracts XML text", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "office-wps-"));
+  const zip = new JSZip();
+  zip.file("docInfo.xml", "<body><p><t>WPS summary: revenue is stable.</t></p></body>");
+
+  const filePath = join(dir, "report.wps");
+  await writeFile(filePath, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
+
+  const result = await readOfficeFile(filePath);
+
+  assert.equal(result.document.kind, "wps");
+  assert.match(result.document.content, /WPS summary: revenue is stable\./);
+});
