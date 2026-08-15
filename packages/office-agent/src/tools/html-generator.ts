@@ -1,26 +1,26 @@
-import { makeId, nowIso } from "../utils.ts";
 import type { GeneratedReport, OfficeReportSection } from "../core/types.ts";
+import { makeId, nowIso } from "../utils.ts";
 
 export function buildHtmlReport(title: string, summary: string, sections: OfficeReportSection[]): string {
-  const safeTitle = escapeHtml(title);
-  const safeSummary = escapeHtml(summary);
-  const sectionHtml = sections
-    .map((section) => {
-      const bullets = section.bullets ?? [];
-      const bulletHtml = bullets.length
-        ? `<ul>${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-        : "";
-      return `
+	const safeTitle = escapeHtml(title);
+	const safeSummary = escapeHtml(summary);
+	const sectionHtml = sections
+		.map((section) => {
+			const bullets = section.bullets ?? [];
+			const bulletHtml = bullets.length
+				? `<ul>${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+				: "";
+			return `
         <section class="card">
           <h2>${escapeHtml(section.title)}</h2>
           <p>${escapeHtml(section.content)}</p>
           ${bulletHtml}
         </section>
       `;
-    })
-    .join("\n");
+		})
+		.join("\n");
 
-  return `<!doctype html>
+	return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -101,56 +101,66 @@ export function buildHtmlReport(title: string, summary: string, sections: Office
 </html>`;
 }
 
-export function createGeneratedReport(title: string, summary: string, sections: OfficeReportSection[]): GeneratedReport {
-  return {
-    id: makeId("report"),
-    title,
-    summary,
-    sections,
-    html: buildHtmlReport(title, summary, sections),
-    createdAt: nowIso(),
-  };
+export function createGeneratedReport(
+	title: string,
+	summary: string,
+	sections: OfficeReportSection[],
+): GeneratedReport {
+	return {
+		id: makeId("report"),
+		title,
+		summary,
+		sections,
+		html: buildHtmlReport(title, summary, sections),
+		createdAt: nowIso(),
+	};
 }
 
 export function buildPreviewPage(args: {
-  title: string;
-  summary: string;
-  documentSections?: OfficeReportSection[];
-  posterPrompt?: string;
-  emailSubject?: string;
-  emailBody?: string;
-  files?: Array<{ fileName: string; summary: string }>;
+	title: string;
+	summary: string;
+	documentSections?: OfficeReportSection[];
+	posterPrompt?: string;
+	emailSubject?: string;
+	emailBody?: string;
+	files?: Array<{ fileName: string; summary: string }>;
 }): string {
-  const cards = (args.documentSections ?? []).map((section) => {
-    const bullets = section.bullets ?? [];
-    const bulletHtml = bullets.length
-      ? `<ul>${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-      : "";
-    return `
+	const cards = (args.documentSections ?? [])
+		.map((section) => {
+			const bullets = section.bullets ?? [];
+			const bulletHtml = bullets.length
+				? `<ul>${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+				: "";
+			return `
       <section class="card">
         <h2>${escapeHtml(section.title)}</h2>
         <p>${escapeHtml(section.content)}</p>
         ${bulletHtml}
       </section>
     `;
-  }).join("\n");
+		})
+		.join("\n");
 
-  const fileList = (args.files ?? []).map((item) => `
+	const fileList = (args.files ?? [])
+		.map(
+			(item) => `
     <div class="card">
       <strong>${escapeHtml(item.fileName)}</strong>
       <p>${escapeHtml(item.summary)}</p>
     </div>
-  `).join("\n");
+  `,
+		)
+		.join("\n");
 
-  const poster = args.posterPrompt
-    ? `<div class="poster"><div><strong>Poster concept</strong><p>${escapeHtml(args.posterPrompt)}</p></div></div>`
-    : `<div class="poster"><div><strong>Poster concept</strong><p>No poster prompt generated yet.</p></div></div>`;
+	const poster = args.posterPrompt
+		? `<div class="poster"><div><strong>Poster concept</strong><p>${escapeHtml(args.posterPrompt)}</p></div></div>`
+		: `<div class="poster"><div><strong>Poster concept</strong><p>No poster prompt generated yet.</p></div></div>`;
 
-  const email = args.emailBody
-    ? `<div class="card"><h3>${escapeHtml(args.emailSubject ?? "Email draft")}</h3><pre>${escapeHtml(args.emailBody)}</pre></div>`
-    : `<div class="card"><h3>Email draft</h3><p>No email content generated yet.</p></div>`;
+	const email = args.emailBody
+		? `<div class="card"><h3>${escapeHtml(args.emailSubject ?? "Email draft")}</h3><pre>${escapeHtml(args.emailBody)}</pre></div>`
+		: `<div class="card"><h3>Email draft</h3><p>No email content generated yet.</p></div>`;
 
-  return `<!doctype html>
+	return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -196,10 +206,10 @@ export function buildPreviewPage(args: {
 }
 
 function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
 }
