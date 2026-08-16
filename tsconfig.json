@@ -97,6 +97,5 @@
   "exclude": [
     "**/dist/**",
     "packages/coding-agent/examples/extensions/gondolin/**",
-    "packages/office-agent.bak/**"
   ]
 }

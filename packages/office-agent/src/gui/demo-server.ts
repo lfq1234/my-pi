@@ -9,7 +9,6 @@
 
 import { randomUUID } from "node:crypto";
 import { Agent, type AgentMessage } from "@earendil-works/pi-agent-core";
-import { type AssistantMessage, createAssistantMessageEventStream } from "@earendil-works/pi-ai";
 import type { ByteTransport, ByteTransportHandlers } from "@earendil-works/pi-client";
 import type {
 	JsonValue,
@@ -32,6 +31,8 @@ import type {
 } from "@earendil-works/pi-server";
 import { PiServer } from "@earendil-works/pi-server";
 import type { ByteConnectionAcceptor, ByteConnectionHandler } from "@earendil-works/pi-server/connection";
+import { makeOfficeDemoStreamFn } from "../core/demo-stream.ts";
+import { OFFICE_SYSTEM_PROMPT } from "../core/prompt.ts";
 import { officeTools } from "../core/tools/index.ts";
 
 export const OFFICE_DEMO_MODEL: ModelMetadata = {
@@ -85,11 +86,20 @@ export class OfficeDemoSessionRuntime implements PiSessionRuntime {
 	private _snapshot: SessionSnapshot;
 	private phase: SessionPhase = "idle";
 
-	constructor(options: { id: string; cwd: string; model: ModelRef; thinkingLevel: ThinkingLevel }) {
-		this.agent = new Agent({
-			initialState: { model: undefined, systemPrompt: "办公助手", tools: officeTools },
-			streamFn: makeOfficeDemoStreamFn(),
-		});
+	constructor(options: {
+		id: string;
+		cwd: string;
+		model: ModelRef;
+		thinkingLevel: ThinkingLevel;
+		/** 外部注入的 Agent（phase-4 rpc 模式用 createOfficeAgentSession 的默认装配）；缺省用 fake 演示流 */
+		agent?: Agent;
+	}) {
+		this.agent =
+			options.agent ??
+			new Agent({
+				initialState: { model: undefined, systemPrompt: OFFICE_SYSTEM_PROMPT, tools: officeTools },
+				streamFn: makeOfficeDemoStreamFn(),
+			});
 		this._snapshot = {
 			id: options.id,
 			name: `Session ${options.id}`,
@@ -217,6 +227,11 @@ export class OfficeDemoSessionRuntime implements PiSessionRuntime {
 /** 内存 service：createSession 返回 office demo runtime */
 export class OfficeDemoServerService implements PiServerService {
 	private readonly sessions = new Map<string, OfficeDemoSessionRuntime>();
+	private readonly agent?: Agent;
+
+	constructor(options?: { agent?: Agent }) {
+		this.agent = options?.agent;
+	}
 
 	async listSessions(): Promise<SessionMetadata[]> {
 		return [...this.sessions.values()].map((r) => {
@@ -236,6 +251,7 @@ export class OfficeDemoServerService implements PiServerService {
 			cwd: options.cwd ?? process.cwd(),
 			model: options.model ?? { provider: "office-demo", id: "demo" },
 			thinkingLevel: options.thinkingLevel ?? "off",
+			agent: this.agent,
 		});
 		this.sessions.set(id, runtime);
 		return runtime;
@@ -329,69 +345,4 @@ function contentToTool(message: Extract<AgentMessage, { role: "toolResult" }>): 
 		.filter((p) => p.type === "text")
 		.map((p) => (p as { type: "text"; text: string }).text)
 		.map((text) => ({ type: "text" as const, text }));
-}
-
-/** fake streamFn：第一轮发 wps_writer 工具调用，第二轮收尾（与 phase-2 验收同款） */
-function makeOfficeDemoStreamFn() {
-	let callCount = 0;
-	return () => {
-		callCount += 1;
-		const stream = createAssistantMessageEventStream();
-		queueMicrotask(() => {
-			if (callCount === 1) {
-				const msg = {
-					role: "assistant",
-					content: [
-						{ type: "text", text: "好的，我来生成 Word 文档。" },
-						{
-							type: "toolCall",
-							id: "call-office-1",
-							name: "wps_writer",
-							arguments: {
-								title: "季度总结",
-								sections: [{ heading: "概述", body: "本季度业务整体增长。这是一份由办公助手自动生成的文档。" }],
-								outPath: process.env.OFFICE_DEMO_OUT ?? "demo-quarterly.docx",
-							},
-						},
-					],
-					api: "office-demo",
-					provider: "office-demo",
-					model: "demo",
-					usage: {
-						input: 0,
-						output: 0,
-						cacheRead: 0,
-						cacheWrite: 0,
-						totalTokens: 0,
-						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
-					},
-					stopReason: "toolUse",
-					timestamp: Date.now(),
-				} as AssistantMessage;
-				stream.push({ type: "start", partial: msg });
-				stream.push({ type: "done", reason: "toolUse", message: msg });
-			} else {
-				const msg = {
-					role: "assistant",
-					content: [{ type: "text", text: "文档已生成完毕。" }],
-					api: "office-demo",
-					provider: "office-demo",
-					model: "demo",
-					usage: {
-						input: 0,
-						output: 0,
-						cacheRead: 0,
-						cacheWrite: 0,
-						totalTokens: 0,
-						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
-					},
-					stopReason: "stop",
-					timestamp: Date.now(),
-				} as AssistantMessage;
-				stream.push({ type: "start", partial: msg });
-				stream.push({ type: "done", reason: "stop", message: msg });
-			}
-		});
-		return stream;
-	};
 }
