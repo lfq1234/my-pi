@@ -62,7 +62,11 @@ export function buildJsaMacro(target: string, instruction: string): string {
 	const isPptx = target === "pptx";
 	const app = isXlsx ? "ET" : isPptx ? "WPP" : "WPS";
 	const lower = instruction.toLowerCase();
-	const header = `// ${app} JSA 宏 · 由 office-agent wps_macro 生成\n// 指令: ${instruction}\n`;
+	// FR-6.3：宏头引用 WPS 对象模型标准 API（速查），减少语法错误
+	const header = `// ${app} JSA 宏 · 由 office-agent wps_macro 生成
+// 指令: ${instruction}
+// 对象模型速查: ActiveSheet.Range().Value / .Font.Bold / .Interior.Color · ActiveDocument.Paragraphs / .Content.Font · ActivePresentation.Slides / Shapes.AddTextbox
+`;
 	if (isXlsx) {
 		const bold = /加粗|bold/.test(lower);
 		const align = /居中|center/.test(lower);

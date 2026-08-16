@@ -41,15 +41,21 @@ export async function compose(input: PosterInput): Promise<DeliveryArtifact> {
 	const font = await loadChineseFont();
 	const { width, height } = input;
 	const hasBg = input.backgroundImage !== undefined;
-	// 有背景图 → 白字（覆盖在图片上）；纯文字层 → 深字（白底海报）
-	const titleColor = hasBg ? "#ffffff" : "#111827";
-	const subtitleColor = hasBg ? "#e5e7eb" : "#4b5563";
+	// 有背景图 → 白字（覆盖在图片上）；纯文字层 → 深字（白底海报）；模板可覆盖
+	const spec = input.templateSpec;
+	const titleFontSize = spec?.title?.fontSize ?? 64;
+	const titleWeight = spec?.title?.weight === "bold" ? 700 : 400;
+	const titleColor = spec?.title?.color ?? (hasBg ? "#ffffff" : "#111827");
+	const titleMarginTop = spec?.title?.marginTop ?? 0;
+	const subtitleFontSize = spec?.subtitle?.fontSize ?? 32;
+	const subtitleColor = spec?.subtitle?.color ?? (hasBg ? "#e5e7eb" : "#4b5563");
+	const subtitleMarginTop = spec?.subtitle?.marginTop ?? 16;
 
 	const titleEl = input.title
-		? `<div style="font-size:64px;font-weight:700;color:${titleColor};margin:0 48px 16px;line-height:1.2;">${esc(input.title)}</div>`
+		? `<div style="font-size:${titleFontSize}px;font-weight:${titleWeight};color:${titleColor};margin:${titleMarginTop}px 48px 16px;line-height:1.2;">${esc(input.title)}</div>`
 		: "";
 	const subtitleEl = input.subtitle
-		? `<div style="font-size:32px;color:${subtitleColor};margin:0 64px;line-height:1.4;">${esc(input.subtitle)}</div>`
+		? `<div style="font-size:${subtitleFontSize}px;color:${subtitleColor};margin:${subtitleMarginTop}px 64px 0;line-height:1.4;">${esc(input.subtitle)}</div>`
 		: "";
 
 	// satori-html 把 HTML 字符串解析为 VNode；再交给 satori 渲染成 SVG

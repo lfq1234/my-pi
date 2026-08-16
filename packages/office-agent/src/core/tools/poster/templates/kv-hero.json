@@ -1,0 +1,10 @@
+{
+  "id": "kv-hero",
+  "name": "品牌主视觉",
+  "width": 1920,
+  "height": 1080,
+  "title": { "fontSize": 96, "weight": "bold", "color": "#FFFFFF", "marginTop": 180 },
+  "subtitle": { "fontSize": 44, "color": "#D1D5DB", "marginTop": 48 },
+  "logo": { "position": "top-left", "size": 140 },
+  "qr": { "position": "bottom-right", "size": 180 }
+}

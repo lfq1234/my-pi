@@ -1,0 +1,10 @@
+{
+  "id": "promo-banner",
+  "name": "促销活动横幅",
+  "width": 800,
+  "height": 450,
+  "title": { "fontSize": 56, "weight": "bold", "color": "#FFD700", "marginTop": 60 },
+  "subtitle": { "fontSize": 28, "color": "#FFF5E6", "marginTop": 24 },
+  "logo": { "position": "bottom-right", "size": 80 },
+  "qr": { "position": "bottom-left", "size": 100 }
+}

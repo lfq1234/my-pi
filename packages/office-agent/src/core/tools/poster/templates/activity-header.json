@@ -1,0 +1,10 @@
+{
+  "id": "activity-header",
+  "name": "活动头图",
+  "width": 1200,
+  "height": 500,
+  "title": { "fontSize": 64, "weight": "bold", "color": "#0EA5E9", "marginTop": 80 },
+  "subtitle": { "fontSize": 30, "color": "#334155", "marginTop": 32 },
+  "logo": { "position": "top-right", "size": 100 },
+  "qr": { "position": "bottom-right", "size": 120 }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "social-promo",
+  "name": "社媒促销海报",
+  "width": 1080,
+  "height": 1080,
+  "title": { "fontSize": 72, "weight": "bold", "color": "#E60012", "marginTop": 120 },
+  "subtitle": { "fontSize": 36, "color": "#333333", "marginTop": 40 },
+  "logo": { "position": "bottom-right", "size": 120 },
+  "qr": { "position": "bottom-left", "size": 160 }
+}

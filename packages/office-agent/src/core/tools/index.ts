@@ -49,6 +49,11 @@ export {
 	type PosterGenerateToolOptions,
 } from "./poster/generate-tool.ts";
 export {
+	getPosterTemplate,
+	POSTER_TEMPLATE_FILES,
+	type PosterTemplateFile,
+} from "./poster/template-registry.ts";
+export {
 	createPosterTemplateTool,
 	createPosterTemplateToolDefinition,
 	POSTER_TEMPLATES,

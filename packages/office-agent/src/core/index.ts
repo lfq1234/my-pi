@@ -1,6 +1,8 @@
 export * from "../gui/index.ts";
 export { OfficeAgentSession, type OfficeAgentSessionOptions } from "./agent-session.ts";
+export { type CompactOptions, compactOfficeContext, estimateTokens } from "./compaction/index.ts";
 export * from "./delivery/index.ts";
+export { COMPACTION_HINT, JSA_REFERENCE_TEXT, OFFICE_SYSTEM_PROMPT } from "./prompt.ts";
 export { OfficeAgentResourceLoader } from "./resource-loader.ts";
 export { type CreateOfficeAgentSessionOptions, createOfficeAgentSession } from "./sdk.ts";
 export { OfficeAgentSettingsManager } from "./settings-manager.ts";

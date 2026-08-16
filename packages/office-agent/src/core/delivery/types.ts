@@ -24,6 +24,21 @@ export interface SlideInput {
 	outPath: string;
 }
 
+/** 海报模板样式规范（phase-6 FR-6.2）：compose 按模板决定文字层字号/颜色/边距 */
+export interface PosterTemplateSpec {
+	title?: {
+		fontSize?: number;
+		weight?: "bold" | "normal";
+		color?: string;
+		marginTop?: number;
+	};
+	subtitle?: {
+		fontSize?: number;
+		color?: string;
+		marginTop?: number;
+	};
+}
+
 /** 海报合成入参 */
 export interface PosterInput {
 	/** 文生图层（phase-5 接入即梦）；缺省时仅输出文字层 */
@@ -34,8 +49,8 @@ export interface PosterInput {
 	subtitle?: string;
 	logoPath?: string;
 	qrPath?: string;
-	/** 模板 id（phase-6） */
-	template?: string;
+	/** 模板样式规范（phase-6）：缺省用默认 64/32 字号 */
+	templateSpec?: PosterTemplateSpec;
 	outPath: string;
 	outKind: "png" | "pdf";
 }
