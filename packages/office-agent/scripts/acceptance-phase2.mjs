@@ -56,11 +56,11 @@ const {
 // AC-2.1 五个工具独立 run() 并返回 artifact
 // ---------------------------------------------------------------------------
 console.log("== AC-2.1 工具独立 run() ==");
-check("officeTools 含 5 个工具", officeTools.length === 5, `got ${officeTools.length}`);
+check("officeTools 至少含 phase-2 的 5 个主干工具", officeTools.length >= 5, `got ${officeTools.length}`);
 const names = officeTools.map((t) => t.name).sort();
 check(
-  "工具名齐全",
-  JSON.stringify(names) === JSON.stringify(["html_generate", "poster_compose", "wps_sheet", "wps_slide", "wps_writer"]),
+  "phase-2 主干工具名齐全（渐进叠加，老工具零改动）",
+  ["html_generate", "poster_compose", "wps_sheet", "wps_slide", "wps_writer"].every((n) => names.includes(n)),
   names.join(","),
 );
 check("每个工具都有 TypeBox schema", officeTools.every((t) => t.parameters && t.parameters.type === "object"));
@@ -188,7 +188,7 @@ check("streamFn 被调用 2 次（工具调用 + 收尾）", callCount === 2, `g
 console.log("== AC-2.4 schema / wrapper ==");
 const { wrapOfficeToolDefinition } = await import("../dist/index.js");
 const defs = office.createOfficeToolDefinitions();
-check("createOfficeToolDefinitions 返回 5 个定义", defs.length === 5);
+check("createOfficeToolDefinitions 至少返回 phase-2 的 5 个定义", defs.length >= 5, `got ${defs.length}`);
 check("定义含 name/label/description/parameters/execute", defs.every((d) => d.name && d.label && d.description && d.parameters && typeof d.execute === "function"));
 check("定义含 meta.direction", defs.every((d) => ["wps", "poster", "html"].includes(d.meta.direction)));
 const wrapped = wrapOfficeToolDefinition(defs[0]);
