@@ -1,1 +1,2 @@
-export * from "./office/index.ts";
+export * from "./core/index.ts";
+export * from "./client/index.ts";

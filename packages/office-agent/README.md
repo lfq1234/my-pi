@@ -1,46 +1,20 @@
 # Office Agent
 
-This package is the starting point for a business-focused office agent built on top of the Pi agent platform.
+This package is the Phase 0 skeleton for the office-specific agent built on the shared pi engine.
 
-## Stage 00 status
+It intentionally keeps the implementation minimal while mirroring the dependency and folder layout used by the coding agent reference package.
 
-This initial version provides the foundational package structure and a minimal office-agent runtime with:
+## Included in this phase
 
-- input/output contract types
-- a lightweight OfficeAgent orchestrator
-- HTML report generation
-- email draft generation
-- poster brief generation
-- a CLI entrypoint for local testing
+- Shared pi engine dependencies
+- Empty skeleton entrypoints for CLI and runtime usage
+- Type stubs for agent/session/resource plumbing
+- A lightweight import proof showing the six core engine packages are wired in
 
-## Example
+## Not included yet
 
-```bash
-node dist/cli.js --demo
-```
+- Office-specific business tools
+- WPS / docx / pptx generation logic
+- GUI or RPC server implementation beyond the skeleton shape
 
-or
-
-```bash
-node dist/cli.js --input ./materials --title "Weekly report"
-```
-
-## Bun runtime
-
-```bash
-bun run ./src/bun/cli.ts --demo
-```
-
-```bash
-bun build --compile --no-compile-autoload-bunfig ./src/bun/cli.ts --outfile ./dist/office-agent
-```
-
-## Planned evolution
-
-The next development phases will add:
-
-- office document parsing
-- richer HTML templates
-- Flower of real Seedance image generation
-- external email service integration
-- web UI and approval flows
+See the requirement doc under `doc/requirements/phase-0-base-reuse.md`.

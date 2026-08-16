@@ -1,79 +1,42 @@
 #!/usr/bin/env node
 
-import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { createOfficeAgent } from "./office-agent.ts";
 
-async function main(): Promise<void> {
-	const { values, positionals } = parseArgs({
-		options: {
-			demo: { type: "boolean", default: false },
-			input: { type: "string" },
-			title: { type: "string" },
-			summary: { type: "string" },
-			audience: { type: "string" },
-			style: { type: "string" },
-		},
-		allowPositionals: true,
-	});
+const USAGE = `office-agent
 
-	const agent = createOfficeAgent({ defaultTitle: values.title ?? "Office Agent Report" });
+Usage:
+  office [--help] [--version]
 
-	if (values.demo) {
-		const result = await agent.run({
-			title: values.title ?? "Demo Office report",
-			summary: values.summary ?? "This demo report shows the initial Office Agent workflow.",
-			audience: values.audience ?? "internal team",
-			style: values.style ?? "modern business",
-			inputFiles: [resolve(process.cwd(), "README.md")],
-		});
+This package is an empty Phase 0 skeleton built on the shared pi engine.
+`;
 
-		console.log(
-			JSON.stringify(
-				{
-					outputDir: result.outputDir,
-					title: result.report.title,
-					intro: result.emailDraft.subject,
-					poster: result.posterBrief.prompt,
-				},
-				null,
-				2,
-			),
-		);
-		return;
-	}
+export async function main(): Promise<void> {
+  const { values } = parseArgs({
+    options: {
+      help: { type: "boolean", short: "h" },
+      version: { type: "boolean", short: "v" },
+    },
+    allowPositionals: true,
+  });
 
-	const inputFiles = values.input
-		? [resolve(values.input)]
-		: positionals.length > 0
-			? positionals.map((item) => resolve(item))
-			: [];
+  if (values.help) {
+    console.log(USAGE);
+    return;
+  }
 
-	const result = await agent.run({
-		inputFiles,
-		title: values.title,
-		summary: values.summary,
-		audience: values.audience,
-		style: values.style,
-	});
+  if (values.version) {
+    console.log("0.1.0");
+    return;
+  }
 
-	console.log(
-		JSON.stringify(
-			{
-				outputDir: result.outputDir,
-				reportTitle: result.report.title,
-				summary: result.report.summary,
-				emailSubject: result.emailDraft.subject,
-				posterPrompt: result.posterBrief.prompt,
-			},
-			null,
-			2,
-		),
-	);
+  console.log(USAGE);
 }
 
-main().catch((error: unknown) => {
-	const message = error instanceof Error ? error.message : String(error);
-	console.error(`Office Agent failed: ${message}`);
-	process.exitCode = 1;
-});
+const executedScriptPath = process.argv[1]?.replaceAll("\\", "/");
+if (executedScriptPath && executedScriptPath.endsWith("dist/cli.js")) {
+  void main().catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`office-agent failed: ${message}`);
+    process.exitCode = 1;
+  });
+}
