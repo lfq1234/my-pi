@@ -8,6 +8,7 @@
  */
 import { parseArgs as nodeParseArgs } from "node:util";
 import { makeOfficeDemoStreamFn } from "./core/demo-stream.ts";
+import { checkEnvironment, printEnvReport } from "./core/env-check.ts";
 import { createOfficeAgentSession } from "./core/sdk.ts";
 import { runInteractive, runPrint, runRpc } from "./modes/index.ts";
 
@@ -25,6 +26,8 @@ export interface Args {
 	host?: string;
 	/** rpc 监听端口（默认 4317） */
 	port: number;
+	/** `office doctor`：环境自检并自动安装缺失依赖 */
+	doctor: boolean;
 	help: boolean;
 	version: boolean;
 }
@@ -36,6 +39,7 @@ export function printHelp(): void {
   office --mode <interactive|print|rpc> [选项]
   office --prompt "<问题>"          # 等价于 --mode print
   office                            # 默认 interactive
+  office doctor                     # 环境自检，缺失依赖自动安装
 
 选项:
   --mode <mode>      运行模式：interactive / print / rpc
@@ -69,7 +73,8 @@ export function parseArgs(argv: string[]): Args {
 		strict: false,
 	});
 	const modeValue = typeof values.mode === "string" ? values.mode : undefined;
-	const promptValue = typeof values.prompt === "string" ? values.prompt : positionals[0];
+	const isDoctor = positionals[0] === "doctor";
+	const promptValue = isDoctor ? undefined : typeof values.prompt === "string" ? values.prompt : positionals[0];
 	let mode: Mode;
 	if (modeValue === "interactive" || modeValue === "print" || modeValue === "rpc") {
 		mode = modeValue;
@@ -79,6 +84,7 @@ export function parseArgs(argv: string[]): Args {
 	const port = typeof values.port === "string" && Number.isInteger(Number(values.port)) ? Number(values.port) : 4317;
 	return {
 		mode,
+		doctor: isDoctor,
 		prompt: promptValue,
 		cwd: typeof values.cwd === "string" ? values.cwd : undefined,
 		host: typeof values.host === "string" ? values.host : undefined,
@@ -96,6 +102,10 @@ export async function main(rawArgs: string[]): Promise<void> {
 	}
 	if (args.version) {
 		console.log(VERSION);
+		return;
+	}
+	if (args.doctor) {
+		await runDoctor();
 		return;
 	}
 
@@ -123,4 +133,12 @@ export async function main(rawArgs: string[]): Promise<void> {
 			await runRpc({ agent, host: args.host, port: args.port, cwd });
 			break;
 	}
+}
+
+/** `office doctor`：环境自检；缺失依赖（LibreOffice）自动安装。 */
+export async function runDoctor(): Promise<void> {
+	console.log("office 环境自检（缺失依赖将自动安装）…\n");
+	const report = await checkEnvironment({ autoInstall: true });
+	printEnvReport(report);
+	process.exitCode = report.allOk ? 0 : 1;
 }

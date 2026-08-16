@@ -43,3 +43,4 @@ plans/
 .pi/hf-sessions-backup/
 collect.sh
 packages/office-agent/examples/out-phase6/
+packages/office-agent/examples/out-env/

@@ -4,6 +4,7 @@
  * 支持：docx→pdf / xlsx→csv / pptx→pdf 等 LibreOffice 能识别的转换。
  * Windows 下探测 soffice.exe 常见安装路径；通过 `-env:UserInstallation`
  * 隔离 profile，避免并发转换时的锁冲突。
+ * 找不到 LibreOffice 时自动安装（ensureLibreOffice：winget/brew/apt），不依赖人工。
  */
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -11,6 +12,7 @@ import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { ensureLibreOffice } from "../env-check.ts";
 
 export type ConvertTarget = "pdf" | "csv" | "png";
 
@@ -59,14 +61,15 @@ export function findLibreOffice(): string | null {
  * 返回输出文件的绝对路径。
  */
 export function convert(src: string, targetExt: ConvertTarget): Promise<string> {
-	const bin = findLibreOffice();
-	if (!bin) {
-		return Promise.reject(
-			new Error(
-				"未找到 LibreOffice。请安装 LibreOffice（https://www.libreoffice.org/）或设置 LIBREOFFICE_PATH 指向 soffice 可执行文件。",
-			),
-		);
-	}
+	// 缺失时自动安装（winget/brew/apt）；仍不可用才抛错
+	return ensureLibreOffice()
+		.catch((error: unknown) => {
+			throw error instanceof Error ? error : new Error(String(error));
+		})
+		.then((bin) => runConvert(bin, src, targetExt));
+}
+
+function runConvert(bin: string, src: string, targetExt: ConvertTarget): Promise<string> {
 	const out = src.replace(/\.[^.]+$/, `.${targetExt}`);
 	const outDir = dirname(src);
 	// 每个转换用独立 UserInstallation，避免并发锁冲突
