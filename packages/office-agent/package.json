@@ -35,7 +35,14 @@
     "@earendil-works/pi-client": "0.84.2",
     "@earendil-works/pi-protocol": "0.84.2",
     "@earendil-works/pi-telemetry": "0.84.2",
-    "@earendil-works/pi-tui": "0.84.2"
+    "@earendil-works/pi-tui": "0.84.2",
+    "docx": "9.7.1",
+    "exceljs": "4.4.0",
+    "pdf-lib": "1.17.1",
+    "pptxgenjs": "4.0.1",
+    "satori": "0.29.0",
+    "satori-html": "0.3.2",
+    "sharp": "0.35.3"
   },
   "devDependencies": {
     "@types/node": "24.12.4",
