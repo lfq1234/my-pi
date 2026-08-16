@@ -5,46 +5,46 @@
  * phase-2 的 tools 直接从此处 import（相对路径）。
  */
 import type { DeliveryArtifact } from "../types.ts";
-import { renderDocx } from "./docx.ts";
-import { renderPptx } from "./pptx.ts";
-import { renderXlsx } from "./xlsx.ts";
-import { compose } from "./poster.ts";
 import { convert, findLibreOffice } from "./convert.ts";
-import type { DocInput, DocRenderer, PosterComposer, SheetInput, SlideInput } from "./types.ts";
+import { renderDocx } from "./docx.ts";
 import { loadChineseFont } from "./fonts.ts";
+import { compose } from "./poster.ts";
+import { renderPptx } from "./pptx.ts";
+import type { DocInput, DocRenderer, PosterComposer, SheetInput, SlideInput } from "./types.ts";
+import { renderXlsx } from "./xlsx.ts";
 
 export type { DeliveryArtifact, OfficeArtifactKind } from "../types.ts";
-export type {
-  DocInput,
-  DocRenderer,
-  PosterComposer,
-  PosterInput,
-  SheetInput,
-  SlideInput,
-} from "./types.ts";
 export type { ConvertTarget } from "./convert.ts";
+export type {
+	DocInput,
+	DocRenderer,
+	PosterComposer,
+	PosterInput,
+	SheetInput,
+	SlideInput,
+} from "./types.ts";
 
 export { renderDocx, renderXlsx, renderPptx, compose, convert, findLibreOffice, loadChineseFont };
 
 /** 三件套生成器的默认实现（聚合三个 render 函数） */
 export function createDocRenderer(): DocRenderer {
-  return { renderDocx, renderXlsx, renderPptx };
+	return { renderDocx, renderXlsx, renderPptx };
 }
 
 /** 海报合成器的默认实现 */
 export function createPosterComposer(): PosterComposer {
-  return { compose };
+	return { compose };
 }
 
 /** 便捷入口：一次生成三件套 */
 export async function renderAll(inputs: {
-  doc?: DocInput;
-  sheet?: SheetInput;
-  slide?: SlideInput;
+	doc?: DocInput;
+	sheet?: SheetInput;
+	slide?: SlideInput;
 }): Promise<DeliveryArtifact[]> {
-  const results: DeliveryArtifact[] = [];
-  if (inputs.doc) results.push(await renderDocx(inputs.doc));
-  if (inputs.sheet) results.push(await renderXlsx(inputs.sheet));
-  if (inputs.slide) results.push(await renderPptx(inputs.slide));
-  return results;
+	const results: DeliveryArtifact[] = [];
+	if (inputs.doc) results.push(await renderDocx(inputs.doc));
+	if (inputs.sheet) results.push(await renderXlsx(inputs.sheet));
+	if (inputs.slide) results.push(await renderPptx(inputs.slide));
+	return results;
 }

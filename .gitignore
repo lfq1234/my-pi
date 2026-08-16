@@ -42,3 +42,7 @@ plans/
 .pi/hf-sessions/
 .pi/hf-sessions-backup/
 collect.sh
+
+# Office agent generated artifacts (demo outputs, never commit)
+packages/office-agent/examples/out/
+packages/office-agent/examples/out-phase2/

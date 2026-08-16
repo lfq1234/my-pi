@@ -1,11 +1,11 @@
 export class OfficeAgentSettingsManager {
-  readonly cwd: string;
+	readonly cwd: string;
 
-  constructor(cwd: string = process.cwd()) {
-    this.cwd = cwd;
-  }
+	constructor(cwd: string = process.cwd()) {
+		this.cwd = cwd;
+	}
 
-  getWorkspaceRoot(): string {
-    return this.cwd;
-  }
+	getWorkspaceRoot(): string {
+		return this.cwd;
+	}
 }

@@ -1,7 +1,7 @@
 export interface OfficeExtension {
-  name: string;
+	name: string;
 }
 
 export function registerOfficeExtension(_extension: OfficeExtension): void {
-  // Phase 0 placeholder.
+	// Phase 0 placeholder.
 }

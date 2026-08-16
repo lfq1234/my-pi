@@ -8,15 +8,15 @@ import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
 
 export async function pngToPdf(png: Buffer): Promise<Buffer> {
-  const meta = await sharp(png).metadata();
-  const width = meta.width ?? 0;
-  const height = meta.height ?? 0;
-  if (width <= 0 || height <= 0) {
-    throw new Error("pngToPdf: 无法读取 PNG 尺寸");
-  }
-  const doc = await PDFDocument.create();
-  const page = doc.addPage([width, height]);
-  const image = await doc.embedPng(png);
-  page.drawImage(image, { x: 0, y: 0, width, height });
-  return Buffer.from(await doc.save());
+	const meta = await sharp(png).metadata();
+	const width = meta.width ?? 0;
+	const height = meta.height ?? 0;
+	if (width <= 0 || height <= 0) {
+		throw new Error("pngToPdf: 无法读取 PNG 尺寸");
+	}
+	const doc = await PDFDocument.create();
+	const page = doc.addPage([width, height]);
+	const image = await doc.embedPng(png);
+	page.drawImage(image, { x: 0, y: 0, width, height });
+	return Buffer.from(await doc.save());
 }

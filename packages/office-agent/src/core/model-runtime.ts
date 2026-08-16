@@ -1,7 +1,7 @@
 export class OfficeModelRuntime {
-  readonly provider = "placeholder";
+	readonly provider = "placeholder";
 
-  getAvailable(): readonly string[] {
-    return [];
-  }
+	getAvailable(): readonly string[] {
+		return [];
+	}
 }

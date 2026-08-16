@@ -14,15 +14,15 @@ export type OfficeArtifactKind = "docx" | "xlsx" | "pptx" | "png" | "pdf" | "htm
  * 与 phase-0 的 ArtifactRef 结构兼容（多出 bytes / createdAt 两个字段）。
  */
 export interface DeliveryArtifact {
-  kind: OfficeArtifactKind;
-  /** 落盘绝对路径 */
-  path: string;
-  /** 预览用（pdf/png 可直接预览；docx/xlsx/pptx 经 convert 转 pdf 后预览） */
-  previewUrl?: string;
-  /** 产物名，用于 office-gui 列表 */
-  label: string;
-  bytes: number;
-  createdAt: number;
+	kind: OfficeArtifactKind;
+	/** 落盘绝对路径 */
+	path: string;
+	/** 预览用（pdf/png 可直接预览；docx/xlsx/pptx 经 convert 转 pdf 后预览） */
+	previewUrl?: string;
+	/** 产物名，用于 office-gui 列表 */
+	label: string;
+	bytes: number;
+	createdAt: number;
 }
 
 /**
@@ -30,18 +30,18 @@ export interface DeliveryArtifact {
  * 兼容保留，新代码请直接用 DeliveryArtifact。
  */
 export interface ArtifactRef {
-  kind: OfficeArtifactKind;
-  path: string;
-  previewUrl?: string;
-  label: string;
+	kind: OfficeArtifactKind;
+	path: string;
+	previewUrl?: string;
+	label: string;
 }
 
 export interface OfficeToolDetails {
-  artifacts?: ArtifactRef[];
-  [key: string]: unknown;
+	artifacts?: ArtifactRef[];
+	[key: string]: unknown;
 }
 
 export interface OfficeAgentSessionOptions {
-  cwd?: string;
-  agentDir?: string;
+	cwd?: string;
+	agentDir?: string;
 }

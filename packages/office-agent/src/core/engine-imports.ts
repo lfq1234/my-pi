@@ -13,10 +13,10 @@
  */
 
 export const officeAgentEngineImports = {
-  agent: "Agent",
-  stream: "streamSimple",
-  client: "PiClient",
-  protocol: "SessionSnapshot",
-  telemetry: "TelemetryContext",
-  tui: "TuiMainScreen",
+	agent: "Agent",
+	stream: "streamSimple",
+	client: "PiClient",
+	protocol: "SessionSnapshot",
+	telemetry: "TelemetryContext",
+	tui: "TuiMainScreen",
 };

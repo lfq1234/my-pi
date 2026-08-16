@@ -1,11 +1,11 @@
 export class OfficeSessionManager {
-  readonly cwd: string;
+	readonly cwd: string;
 
-  constructor(cwd: string = process.cwd()) {
-    this.cwd = cwd;
-  }
+	constructor(cwd: string = process.cwd()) {
+		this.cwd = cwd;
+	}
 
-  getCwd(): string {
-    return this.cwd;
-  }
+	getCwd(): string {
+		return this.cwd;
+	}
 }
