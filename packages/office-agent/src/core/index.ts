@@ -2,6 +2,7 @@ export * from "../gui/index.ts";
 export { OfficeAgentSession, type OfficeAgentSessionOptions } from "./agent-session.ts";
 export { type CompactOptions, compactOfficeContext, estimateTokens } from "./compaction/index.ts";
 export * from "./delivery/index.ts";
+export { makeOfficeDemoStreamFn } from "./demo-stream.ts";
 export {
 	checkChineseFont,
 	checkEnvironment,

@@ -110,10 +110,10 @@ export async function main(rawArgs: string[]): Promise<void> {
 	}
 
 	const cwd = args.cwd ?? process.cwd();
-	const { session, agent } = await createOfficeAgentSession({
+	// 无 LLM 环境的演示兜底（fake 流会调用 wps_writer 真实生成 docx）；
+	// 有真实模型时编程式传 model（默认走 streamSimple）。rpc 模式在 runRpc 内部自建 agent。
+	const { session } = await createOfficeAgentSession({
 		cwd,
-		// 无 LLM 环境的演示兜底（fake 流会调用 wps_writer 真实生成 docx）；
-		// 有真实模型时编程式传 model（默认走 streamSimple）
 		streamFn: makeOfficeDemoStreamFn(),
 	});
 
@@ -125,12 +125,7 @@ export async function main(rawArgs: string[]): Promise<void> {
 			process.exitCode = await runPrint(session, { prompt: args.prompt ?? "" });
 			break;
 		case "rpc":
-			if (!agent) {
-				console.error("Error: rpc 模式需要 agent");
-				process.exitCode = 1;
-				break;
-			}
-			await runRpc({ agent, host: args.host, port: args.port, cwd });
+			await runRpc({ streamFn: makeOfficeDemoStreamFn(), host: args.host, port: args.port, cwd });
 			break;
 	}
 }

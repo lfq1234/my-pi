@@ -41,9 +41,26 @@ class TcpByteConnection implements ByteConnection {
 	}
 
 	close(): Promise<void> {
+		if (this.closed) return Promise.resolve();
 		this.closed = true;
 		return new Promise<void>((resolve) => {
-			this.socket.end(() => resolve());
+			const socket = this.socket;
+			// 无论优雅 end 还是被 destroy，'close' 事件一定触发 → resolve（防止 close 挂起）
+			socket.once("close", () => resolve());
+			if (socket.destroyed) {
+				resolve();
+				return;
+			}
+			try {
+				socket.end();
+			} catch {
+				socket.destroy();
+			}
+			// 兜底：0.5s 后对端仍未关闭则强制销毁
+			const timer = setTimeout(() => {
+				if (!socket.destroyed) socket.destroy();
+			}, 500);
+			socket.once("close", () => clearTimeout(timer));
 		});
 	}
 }
@@ -54,6 +71,7 @@ export function createTcpListener(options: TcpListenerOptions): PiServerListener
 	let server: Server | undefined;
 	let accept: ByteConnectionAcceptor | undefined;
 	let boundPort: number | undefined;
+	const sockets = new Set<Socket>();
 
 	return {
 		get address(): string | undefined {
@@ -63,6 +81,8 @@ export function createTcpListener(options: TcpListenerOptions): PiServerListener
 			if (server) throw new Error("TCP listener is already started");
 			accept = acceptor;
 			const srv = createServer((socket) => {
+				sockets.add(socket);
+				socket.once("close", () => sockets.delete(socket));
 				const connection = new TcpByteConnection(socket);
 				const handler: ByteConnectionHandler = accept!(connection);
 				socket.on("data", (chunk) => {
@@ -87,6 +107,9 @@ export function createTcpListener(options: TcpListenerOptions): PiServerListener
 			server = undefined;
 			accept = undefined;
 			if (!srv) return;
+			// 先销毁活跃连接，避免 srv.close() 等待挂起（client 端连接还开着时 close 会卡死）
+			for (const socket of sockets) socket.destroy();
+			sockets.clear();
 			await new Promise<void>((resolve) => {
 				srv.close(() => resolve());
 			});
