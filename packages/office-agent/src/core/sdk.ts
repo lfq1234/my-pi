@@ -27,6 +27,8 @@ export interface CreateOfficeAgentSessionOptions extends OfficeAgentSessionOptio
 	tools?: OfficeToolsOptions;
 	/** 系统提示（默认 OFFICE_SYSTEM_PROMPT，FR-4.5 由 SDK 默认装配） */
 	systemPrompt?: string;
+	/** 追加系统提示文本（subagent 角色注入，追加到默认/指定系统提示之后） */
+	appendSystemPrompt?: string;
 	/** 覆盖流函数（默认 streamSimple；无 LLM 环境可注入演示流，如 makeOfficeDemoStreamFn） */
 	streamFn?: StreamFunction;
 	/** 内联扩展（doc/modules/extensions.md）：注册工具/提示/命令，合并进默认装配 */
@@ -44,7 +46,11 @@ export async function createOfficeAgentSession(
 		throw new Error(`扩展工具 "${conflict.name}" 与内置 officeTools 同名，请改名后重试。`);
 	}
 	const tools = [...officeTools, ...extTools];
-	const systemPrompt = [options.systemPrompt ?? OFFICE_SYSTEM_PROMPT, ...ext.promptSnippets]
+	const systemPrompt = [
+		options.systemPrompt ?? OFFICE_SYSTEM_PROMPT,
+		options.appendSystemPrompt,
+		...ext.promptSnippets,
+	]
 		.filter(Boolean)
 		.join("\n\n");
 

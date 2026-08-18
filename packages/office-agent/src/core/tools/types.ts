@@ -27,25 +27,25 @@ export interface OfficeArtifactDetails {
 
 /**
  * office 工具定义（轻量双形态之一）。
- * execute 返回 AgentToolResult<OfficeArtifactDetails>，details 携带 artifacts。
+ * execute 返回 AgentToolResult<TDetails>，默认 details 携带 artifacts；
+ * 特殊工具（如 subagent）可指定 TDetails 携带结构化结果。
  */
-export interface OfficeToolDefinition<TParams extends TSchema = TSchema> {
+export interface OfficeToolDefinition<TParams extends TSchema = TSchema, TDetails = OfficeArtifactDetails> {
 	name: string;
 	label: string;
 	description: string;
 	/** 可选的一句话提示（phase-6 系统提示拼接用） */
 	promptSnippet?: string;
 	parameters: TParams;
-	execute(
-		toolCallId: string,
-		params: Static<TParams>,
-		signal?: AbortSignal,
-	): Promise<AgentToolResult<OfficeArtifactDetails>>;
+	execute(toolCallId: string, params: Static<TParams>, signal?: AbortSignal): Promise<AgentToolResult<TDetails>>;
 	meta: OfficeToolMeta;
 }
 
 /** AgentTool 形态（pi-agent-core 真实类型，注入 Agent 用） */
-export type OfficeTool<TParams extends TSchema = TSchema> = AgentTool<TParams, OfficeArtifactDetails>;
+export type OfficeTool<TParams extends TSchema = TSchema, TDetails = OfficeArtifactDetails> = AgentTool<
+	TParams,
+	TDetails
+>;
 
 /** 工具工厂约定的返回类型：createXxxToolDefinition → OfficeToolDefinition */
 export type { AgentToolResult, Static, TSchema };

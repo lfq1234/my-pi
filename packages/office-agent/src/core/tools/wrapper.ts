@@ -6,12 +6,12 @@
  * ExtensionContext 依赖与 TUI 渲染字段，只做 AgentTool 的最小适配。
  */
 import type { Static, TSchema } from "typebox";
-import type { OfficeTool, OfficeToolDefinition } from "./types.ts";
+import type { OfficeArtifactDetails, OfficeTool, OfficeToolDefinition } from "./types.ts";
 
 /** 把 OfficeToolDefinition 包装为 pi-agent-core 的 AgentTool。 */
-export function wrapOfficeToolDefinition<TParams extends TSchema>(
-	definition: OfficeToolDefinition<TParams>,
-): OfficeTool<TParams> {
+export function wrapOfficeToolDefinition<TParams extends TSchema, TDetails = OfficeArtifactDetails>(
+	definition: OfficeToolDefinition<TParams, TDetails>,
+): OfficeTool<TParams, TDetails> {
 	return {
 		name: definition.name,
 		label: definition.label,
@@ -22,6 +22,6 @@ export function wrapOfficeToolDefinition<TParams extends TSchema>(
 }
 
 /** 批量包装。 */
-export function wrapOfficeToolDefinitions(definitions: OfficeToolDefinition<any>[]): OfficeTool<any>[] {
+export function wrapOfficeToolDefinitions(definitions: OfficeToolDefinition<any, any>[]): OfficeTool<any, any>[] {
 	return definitions.map((definition) => wrapOfficeToolDefinition(definition));
 }

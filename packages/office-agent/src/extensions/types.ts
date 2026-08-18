@@ -6,12 +6,14 @@
  * 只保留办公场景需要的注册能力（工具 / 提示片段 / 命令）。
  */
 import type { TSchema } from "typebox";
-import type { OfficeToolDefinition } from "../core/tools/types.ts";
+import type { OfficeArtifactDetails, OfficeToolDefinition } from "../core/tools/types.ts";
 
 /** 扩展可调用的注册 API。 */
 export interface OfficeExtensionAPI {
 	/** 注册一个办公工具（OfficeToolDefinition 双形态，wrap 后进 Agent）。 */
-	registerTool<TParams extends TSchema>(tool: OfficeToolDefinition<TParams>): void;
+	registerTool<TParams extends TSchema, TDetails = OfficeArtifactDetails>(
+		tool: OfficeToolDefinition<TParams, TDetails>,
+	): void;
 	/** 注册一段系统提示片段（追加到 OFFICE_SYSTEM_PROMPT 尾部）。 */
 	registerPromptSnippet(name: string, snippet: string): void;
 	/** 注册一个自定义命令（office run <name> 或扩展内部调度）。 */
@@ -26,7 +28,7 @@ export type OfficeInlineExtension = OfficeExtensionFactory | { name: string; fac
 
 /** 扩展执行结果汇总。 */
 export interface ExtensionRegistration {
-	tools: OfficeToolDefinition<any>[];
+	tools: OfficeToolDefinition<any, any>[];
 	promptSnippets: string[];
 	commands: Map<string, (args: string[]) => string | Promise<string>>;
 	errors: { name: string; error: string }[];

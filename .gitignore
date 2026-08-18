@@ -45,3 +45,4 @@ collect.sh
 packages/office-agent/examples/out-phase6/
 packages/office-agent/examples/out-env/
 packages/office-agent/examples/out-modules/
+packages/office-agent/examples/out-subagent/
